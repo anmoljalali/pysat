@@ -37,11 +37,10 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import functools
-import numpy as np
-import pandas as pds
 import warnings
 
 import pysat
+from pysat.instruments.methods import nasa_cdaweb as cdw
 
 import logging
 logger = logging.getLogger(__name__)
@@ -52,6 +51,11 @@ name = 'fuv'
 tags = {'level_2': 'Level 2 public geophysical data'}
 sat_ids = {'': ['level_2']}
 _test_dates = {'': {'level_2': pysat.datetime(2017, 5, 27)}}
+
+fname1 = 'ICON_L2-6_EUV_{year:4d}-{month:02d}-{day:02d}_v01r000.NC'
+supported_tags = {'': {'level_2': fname1}}
+list_files = functools.partial(cdw.list_files,
+                               supported_tags=supported_tags)
 
 
 def init(self):
@@ -71,8 +75,8 @@ def init(self):
 
     """
 
-    logger.info("Mission acknowledgements and data restrictions will be printed " +
-          "here when available.")
+    logger.info("Mission acknowledgements and data restrictions will be " +
+                "printed here when available.")
 
     pass
 
@@ -183,75 +187,6 @@ def load(fnames, tag=None, sat_id=None):
                                     min_label='ValidMin',
                                     max_label='ValidMax',
                                     fill_label='FillVal')
-
-
-def list_files(tag=None, sat_id=None, data_path=None, format_str=None):
-    """Produce a list of files corresponding to ICON FUV.
-
-    This routine is invoked by pysat and is not intended for direct use by
-    the end user.
-
-    Multiple data levels may be supported via the 'tag' input string.
-    Currently defaults to level-2 data, or L2 in the filename.
-
-    Parameters
-    ----------
-    tag : string ('')
-        tag name used to identify particular data set to be loaded.
-        This input is nominally provided by pysat itself.
-    sat_id : string ('')
-        Satellite ID used to identify particular data set to be loaded.
-        This input is nominally provided by pysat itself.
-    data_path : string
-        Full path to directory containing files to be loaded. This
-        is provided by pysat. The user may specify their own data path
-        at Instrument instantiation and it will appear here.
-    format_str : string (None)
-        String template used to parse the datasets filenames. If a user
-        supplies a template string at Instrument instantiation
-        then it will appear here, otherwise defaults to None.
-
-    Returns
-    -------
-    pandas.Series
-        Series of filename strings, including the path, indexed by datetime.
-
-    Examples
-    --------
-    ::
-        If a filename is SPORT_L2_IVM_2019-01-01_v01r0000.NC then the template
-        is 'SPORT_L2_IVM_{year:04d}-{month:02d}-{day:02d}_' +
-        'v{version:02d}r{revision:04d}.NC'
-
-    Note
-    ----
-    The returned Series should not have any duplicate datetimes. If there are
-    multiple versions of a file the most recent version should be kept and the
-    rest discarded. This routine uses the pysat.Files.from_os constructor, thus
-    the returned files are up to pysat specifications.
-
-    """
-
-    desc = None
-    level = tag
-    if level == 'level_1':
-        code = 'L1'
-        desc = None
-    elif level == 'level_2':
-        code = 'L2'
-        desc = None
-    else:
-        raise ValueError('Unsupported level supplied: ' + level)
-
-    if format_str is None:
-        format_str = 'ICON_'+code+'_FUV_Daytime-ON2'
-        if desc is not None:
-            format_str += '_' + desc + '_'
-        format_str += '_{year:4d}-{month:02d}-{day:02d}'
-        format_str += '_v{version:02d}r{revision:03d}.NC'
-
-    return pysat.Files.from_os(data_path=data_path,
-                               format_str=format_str)
 
 
 def download(date_array, tag, sat_id, data_path=None, user=None,
