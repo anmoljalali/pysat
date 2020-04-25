@@ -189,6 +189,7 @@ class TestBasics():
                                     tag='LevelA',
                                     sat_id='Sat42')
         assert testInst.directory_format == '/dir/Sat42/LevelA/data'
+        del inst_module, testInst
 
     def test_directory_format_nonfunction(self):
         """Test that directory_format as string is passed thru unchanged
@@ -200,6 +201,7 @@ class TestBasics():
                                     tag='LevelA',
                                     sat_id='Sat42')
         assert testInst.directory_format == 'dir_str'
+        del inst_module, testInst
 
     # --------------------------------------------------------------------------
     #
