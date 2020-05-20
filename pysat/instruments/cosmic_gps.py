@@ -137,7 +137,7 @@ def list_files(tag=None, sat_id=None, data_path=None, format_str=None):
         return pysat.Series(None)
 
 
-def load(fnames, tag=None, sat_id=None):
+def load(fnames, tag=None, sat_id=None, altitude_bin=None):
     """Load COSMIC GPS files.
 
     Parameters
@@ -148,6 +148,9 @@ def load(fnames, tag=None, sat_id=None):
         tag or None (default=None)
     sat_id : (str or NoneType)
         satellite id or None (default=None)
+    altitude_bin : integer
+        Number of kilometers to bin altitude profiles by when loading.
+        Currently only supported for tag='ionprf'.
 
     Returns
     -------
@@ -163,7 +166,8 @@ def load(fnames, tag=None, sat_id=None):
     if num != 0:
         # call separate load_files routine, segemented for possible
         # multiprocessor load, not included and only benefits about 20%
-        output = pysat.DataFrame(load_files(fnames, tag=tag, sat_id=sat_id))
+        output = pysat.DataFrame(load_files(fnames, tag=tag, sat_id=sat_id,
+                                            altitude_bin=altitude_bin))
         utsec = output.hour * 3600. + output.minute * 60. + output.second
         output.index = \
             pysat.utils.time.create_datetime_index(year=output.year,
